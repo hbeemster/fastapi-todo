@@ -83,4 +83,5 @@ async def delete(item_id: int, db: Session = Depends(get_db)):
 
 
 if __name__ == "__main__":
+    """Run as module."""
     uvicorn.run(app, host="0.0.0.0", port=8000)
