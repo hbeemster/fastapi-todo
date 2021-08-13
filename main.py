@@ -2,6 +2,7 @@ import random
 import uuid
 from datetime import timedelta
 
+import uvicorn
 from fastapi import Depends
 from fastapi import FastAPI, Form
 from fastapi import Request, Response
@@ -33,8 +34,15 @@ def get_db():
         db.close()
 
 
+@app.get("/todos")
+async def todos(request: Request, db: Session = Depends(get_db)):
+    session_key = request.cookies.get("session_key", uuid.uuid4().hex)
+    todos = get_todos(db, session_key)
+
+    return todos
+
 @app.get("/", response_class=HTMLResponse)
-def home(request: Request, db: Session = Depends(get_db)):
+async def home(request: Request, db: Session = Depends(get_db)):
     session_key = request.cookies.get("session_key", uuid.uuid4().hex)
     todos = get_todos(db, session_key)
     context = {
@@ -48,7 +56,7 @@ def home(request: Request, db: Session = Depends(get_db)):
 
 
 @app.post("/add", response_class=HTMLResponse)
-def post_add(request: Request, content: str = Form(...), db: Session = Depends(get_db)):
+async def post_add(request: Request, content: str = Form(...), db: Session = Depends(get_db)):
     session_key = request.cookies.get("session_key")
     todo = create_todo(db, content=content, session_key=session_key)
     context = {"request": request, "todo": todo}
@@ -56,19 +64,23 @@ def post_add(request: Request, content: str = Form(...), db: Session = Depends(g
 
 
 @app.get("/edit/{item_id}", response_class=HTMLResponse)
-def get_edit(request: Request, item_id: int, db: Session = Depends(get_db)):
+async def get_edit(request: Request, item_id: int, db: Session = Depends(get_db)):
     todo = get_todo(db, item_id)
     context = {"request": request, "todo": todo}
     return templates.TemplateResponse("todo/form.html", context)
 
 
 @app.put("/edit/{item_id}", response_class=HTMLResponse)
-def put_edit(request: Request, item_id: int, content: str = Form(...), db: Session = Depends(get_db)):
+async def put_edit(request: Request, item_id: int, content: str = Form(...), db: Session = Depends(get_db)):
     todo = update_todo(db, item_id, content)
     context = {"request": request, "todo": todo}
     return templates.TemplateResponse("todo/item.html", context)
 
 
 @app.delete("/delete/{item_id}", response_class=Response)
-def delete(item_id: int, db: Session = Depends(get_db)):
+async def delete(item_id: int, db: Session = Depends(get_db)):
     delete_todo(db, item_id)
+
+
+if __name__ == "__main__":
+    uvicorn.run(app, host="0.0.0.0", port=8000)
