@@ -14,7 +14,7 @@ from sqlalchemy.orm import Session
 from database import Base
 from database import SessionLocal
 from database import engine
-from models import create_todo
+from models import create_todo, search_todos
 from models import delete_todo
 from models import get_todo
 from models import get_todos
@@ -80,6 +80,15 @@ async def put_edit(request: Request, item_id: int, content: str = Form(...), db:
 @app.delete("/delete/{item_id}", response_class=Response)
 async def delete(item_id: int, db: Session = Depends(get_db)):
     delete_todo(db, item_id)
+
+
+@app.post("/search", response_class=HTMLResponse)
+async def post_search(request: Request, search: str = Form(...), db: Session = Depends(get_db)):
+    session_key = request.cookies.get("session_key")
+    todo = search_todos(db, search, session_key)
+    context = {"request": request, "todo": todo}
+    return templates.TemplateResponse("todo/form.html", context)
+
 
 
 if __name__ == "__main__":

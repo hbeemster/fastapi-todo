@@ -35,7 +35,13 @@ def update_todo(db: Session, item_id: int, content: str):
 
 
 def get_todos(db: Session, session_key: str, skip: int = 0, limit: int = 100):
-    return db.query(ToDo).filter(ToDo.session_key == session_key).offset(skip).limit(limit).all()
+    return (
+        db.query(ToDo)
+        .filter(ToDo.session_key == session_key)
+        .offset(skip)
+        .limit(limit)
+        .all()
+    )
 
 
 def delete_todo(db: Session, item_id: int):
@@ -43,3 +49,10 @@ def delete_todo(db: Session, item_id: int):
     db.delete(todo)
     db.commit()
 
+
+def search_todos(db: Session, content: str, session_key: str):
+    return (
+        db.query(ToDo)
+        .filter(ToDo.content.like(f"%{content}%"), ToDo.session_key == session_key)
+        .all()
+    )
