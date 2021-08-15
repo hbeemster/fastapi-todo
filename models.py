@@ -1,3 +1,5 @@
+from typing import Optional
+
 from sqlalchemy import Column
 from sqlalchemy import Integer
 from sqlalchemy import String
@@ -12,6 +14,13 @@ class ToDo(Base):
     id = Column(Integer, primary_key=True, index=True)
     content = Column(String)
     session_key = Column(String)
+
+    def __str__(self):
+        return self.content
+
+    def __repr__(self):
+        return f"ToDo(id={self.id}, content={self.content})"
+
 
 
 def create_todo(db: Session, content: str, session_key: str):
@@ -50,7 +59,7 @@ def delete_todo(db: Session, item_id: int):
     db.commit()
 
 
-def search_todos(db: Session, content: str, session_key: str):
+def search_todos(db: Session, session_key: str, content: Optional[str] = None):
     return (
         db.query(ToDo)
         .filter(ToDo.content.like(f"%{content}%"), ToDo.session_key == session_key)

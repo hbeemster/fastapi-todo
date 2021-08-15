@@ -1,6 +1,7 @@
 import random
 import uuid
 from datetime import timedelta
+from typing import Optional
 
 import uvicorn
 from fastapi import Depends
@@ -82,13 +83,16 @@ async def delete(item_id: int, db: Session = Depends(get_db)):
     delete_todo(db, item_id)
 
 
-@app.post("/search", response_class=HTMLResponse)
-async def post_search(request: Request, search: str = Form(...), db: Session = Depends(get_db)):
+@app.get("/search", response_class=HTMLResponse)
+async def get_search(request: Request, search: Optional[str] = None, db: Session = Depends(get_db)):
     session_key = request.cookies.get("session_key")
-    todo = search_todos(db, search, session_key)
-    context = {"request": request, "todo": todo}
-    return templates.TemplateResponse("todo/form.html", context)
-
+    todos = search_todos(db, session_key, search)
+    if todos:
+        context = {"request": request, "todos": todos}
+        return templates.TemplateResponse("todo/items.html", context)
+    else:
+        context = {"request": request}
+        return templates.TemplateResponse("todo/no_items.html", context)
 
 
 if __name__ == "__main__":

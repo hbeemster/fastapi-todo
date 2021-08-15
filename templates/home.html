@@ -12,24 +12,17 @@
 {% block content %}
     <div class="uk-card uk-card-default uk-card-body uk-width-1-2@m uk-margin-top">
 
-        <input class="form-control" type="text"
-               name="search" placeholder="Begin Typing To Search Tasks..."
-               hx-post="/search"
-               hx-trigger="keyup changed delay:500ms"
-               hx-target="#todoItems"
-               hx-indicator=".htmx-indicator">
+        <div class="uk-margin uk-inline uk-width-1-1" uk-margin>
+            <span class="uk-form-icon" uk-icon="icon: search"></span>
+            <input class="uk-input" type="text"
+                   name="search" placeholder="Begin Typing To Search Tasks..."
+{#                   hx-post="/search"#}
+                   hx-get="/search"
+                   hx-trigger="keyup changed delay:500ms"
+                   hx-target="#todoItems"
+                   hx-indicator=".htmx-indicator">
+        </div>
 
-
-        <form id="searchForm" class="uk-form-horizontal" hx-post="/search" hx-swap="beforeend"
-              hx-target="#todoItems"
-        >
-            <div class="uk-margin uk-inline uk-width-1-1" uk-margin>
-                <span class="uk-form-icon" uk-icon="icon: search"></span>
-                <input id="contentInput" autocomplete="off" class="uk-input" type="text" name="content"
-                       hx-trigger="keyup changed delay:500ms"
-                       placeholder="Search your tasks here...">
-            </div>
-        </form>
         <form id="todoForm" class="uk-form-horizontal" hx-post="/add" hx-swap="beforeend" hx-target="#todoItems"
               hx-trigger="submit">
             <div class="uk-margin uk-inline uk-width-1-1" uk-margin>
